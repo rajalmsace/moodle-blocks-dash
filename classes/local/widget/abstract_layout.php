@@ -59,17 +59,17 @@ abstract class abstract_layout extends \block_dash\local\layout\abstract_layout 
         ];
 
         if (!empty($this->get_data_source()->get_all_preferences())) {
-            try {
+            //try {
                 $templatedata['data'] = $this->get_data_source()->get_widget_data();
 
-            } catch (\Exception $e) {
-                $error = \html_writer::tag('p', get_string('databaseerror', 'block_dash'));
-                if (is_siteadmin()) {
-                    $error .= \html_writer::tag('p', $e->getMessage());
-                }
-                $templatedata['error'] .= $OUTPUT->notification($error, 'error');
-                throw new moodle_exception('datanotfetch', 'block_dash', '', null, $e->getMessage());
-            }
+            // } catch (\Exception $e) {
+            //     $error = \html_writer::tag('p', get_string('databaseerror', 'block_dash'));
+            //     if (is_siteadmin()) {
+            //         $error .= \html_writer::tag('p', $e->getMessage());
+            //     }
+            //     $templatedata['error'] .= $OUTPUT->notification($error, 'error');
+            //     throw new moodle_exception('datanotfetch', 'block_dash', '', null, $e->getMessage());
+            // }
         }
 
         $formhtml = $this->get_data_source()->get_filter_collection()->create_form_elements();

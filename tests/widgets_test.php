@@ -36,7 +36,6 @@ use core_message\tests\helper as testhelper;
  * @runTestsInSeparateProcesses
  */
 final class widgets_test extends \advanced_testcase {
-
     /**
      * Demo of test user.
      *

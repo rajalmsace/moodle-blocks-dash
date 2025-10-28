@@ -27,8 +27,6 @@ namespace block_dash\local\dash_framework\query_builder;
 use coding_exception;
 use dml_exception;
 
-use function GuzzleHttp\debug_resource;
-
 /**
  * Builds a query.
  *
@@ -173,6 +171,7 @@ class builder {
     /**
      * Set whether to put order by before joins.
      *
+     * @param array $fromsql
      * @return $this
      */
     public function set_sql_cte($fromsql) {
@@ -200,8 +199,7 @@ class builder {
     /**
      * Join raw in query.
      *
-     * @param string $joinsql SQL join type. See self::TYPE_*
-     * @param array $parameters Extra parameters used in join SQL.
+     * @param join $join
      * @return $this
      */
     public function join_raw(join $join): builder {
@@ -439,7 +437,7 @@ class builder {
             }
         }
 
-        $unique = array_key_exists('unique_id', $this->selects) ? '' : 'DISTINCT' ;
+        $unique = array_key_exists('unique_id', $this->selects) ? '' : 'DISTINCT';
         $sql .= 'SELECT ' . $unique . ' ' . $this->build_select() . ' FROM {' . $this->table . '} ' . $this->tablealias;
 
         $params = [];

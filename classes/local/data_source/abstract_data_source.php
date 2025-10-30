@@ -204,7 +204,7 @@ abstract class abstract_data_source implements data_source_interface, \templatab
         if (is_null($this->query) || $count) {
 
             $visiblefields = [];
-            $fields = $this->get_preferences('available_fields');
+            $fields = $this->get_preferences('available_fields') ?? [];
             foreach ($fields as $fieldname => $preferences) {
                 if (isset($preferences['visible']) && $preferences['visible']) {
                     $visiblefields[] = $fieldname;

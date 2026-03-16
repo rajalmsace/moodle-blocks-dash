@@ -31,7 +31,6 @@ use renderer_base;
  * @package block_dash
  */
 class paginator {
-
     /**
      * Template name.
      */
@@ -70,8 +69,12 @@ class paginator {
      * @param bool $showpagesummary If true, a human readable summary will be displayed above paginator (Showing x of x out of x).
      * @throws \coding_exception
      */
-    public function __construct(callable $countfunction, $currentpage = 0, $perpage = self::PER_PAGE_DEFAULT,
-                                $showpagesummary = true) {
+    public function __construct(
+        callable $countfunction,
+        $currentpage = 0,
+        $perpage = self::PER_PAGE_DEFAULT,
+        $showpagesummary = true
+    ) {
         if (!is_int($perpage)) {
             throw new \coding_exception('Per page value must be an integer.');
         }
@@ -173,7 +176,6 @@ class paginator {
         $count = $this->get_page_count();
         $frontdivider = false;
         $backdivider = false;
-
 
         $items = [];
         for ($i = 0; $i < min($count, 20); $i++) {

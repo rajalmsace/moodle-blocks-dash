@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     services:
       postgres:
@@ -28,18 +28,24 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - php: '8.3'
-            moodle-branch: 'MOODLE_405_STABLE'
-            database: 'pgsql'
-          - php: '8.3'
-            moodle-branch: 'MOODLE_405_STABLE'
-            database: 'mariadb'
-          - php: '8.2'
-            moodle-branch: 'MOODLE_404_STABLE'
-            database: 'pgsql'
-          - php: '8.2'
-            moodle-branch: 'MOODLE_404_STABLE'
-            database: 'mariadb'
+          - php: "8.3"
+            moodle-branch: "MOODLE_501_STABLE"
+            database: "mariadb"
+          - php: "8.3"
+            moodle-branch: "MOODLE_501_STABLE"
+            database: "pgsql"
+          - php: "8.3"
+            moodle-branch: "MOODLE_500_STABLE"
+            database: "mariadb"
+          - php: "8.3"
+            moodle-branch: "MOODLE_500_STABLE"
+            database: "pgsql"
+          - php: "8.2"
+            moodle-branch: "MOODLE_405_STABLE"
+            database: "mariadb"
+          - php: "8.2"
+            moodle-branch: "MOODLE_405_STABLE"
+            database: "pgsql"
 
     steps:
       - name: Check out repository code
@@ -60,6 +66,7 @@ jobs:
           echo $(cd ci/bin; pwd) >> $GITHUB_PATH
           echo $(cd ci/vendor/bin; pwd) >> $GITHUB_PATH
           sudo locale-gen en_AU.UTF-8
+          echo "NVM_DIR=$HOME/.nvm" >> $GITHUB_ENV
 
       - name: Install moodle-plugin-ci
         run: |
@@ -75,7 +82,6 @@ jobs:
         run: moodle-plugin-ci phplint
 
       - name: PHP Copy/Paste Detector
-        continue-on-error: true # This step will show errors but will not fail
         if: ${{ always() }}
         run: moodle-plugin-ci phpcpd
 

@@ -27,15 +27,12 @@ namespace block_dash\local\dash_framework\query_builder;
 use coding_exception;
 use dml_exception;
 
-use function GuzzleHttp\debug_resource;
-
 /**
  * Builds a query.
  *
  * @package block_dash
  */
 class builder {
-
     /**
      * @var string
      */
@@ -173,6 +170,7 @@ class builder {
     /**
      * Set whether to put order by before joins.
      *
+     * @param array $fromsql
      * @return $this
      */
     public function set_sql_cte($fromsql) {
@@ -191,8 +189,14 @@ class builder {
      * @param array $extraparameters Extra parameters used in join SQL.
      * @return $this
      */
-    public function join(string $table, string $alias, string $jointablefield, string $origintablefield,
-                         $jointype = join::TYPE_INNER_JOIN, array $extraparameters = []): builder {
+    public function join(
+        string $table,
+        string $alias,
+        string $jointablefield,
+        string $origintablefield,
+        $jointype = join::TYPE_INNER_JOIN,
+        array $extraparameters = []
+    ): builder {
         $this->joins[] = new join($table, $alias, $jointablefield, $origintablefield, $jointype, $extraparameters);
         return $this;
     }
@@ -200,8 +204,7 @@ class builder {
     /**
      * Join raw in query.
      *
-     * @param string $joinsql SQL join type. See self::TYPE_*
-     * @param array $parameters Extra parameters used in join SQL.
+     * @param join $join
      * @return $this
      */
     public function join_raw(join $join): builder {
@@ -244,8 +247,12 @@ class builder {
      *
      * @return where
      */
-    public function where(string $selector, array $values, string $operator = where::OPERATOR_EQUAL,
-        string $conjunctive = where::CONJUNCTIVE_OPERATOR_AND): where {
+    public function where(
+        string $selector,
+        array $values,
+        string $operator = where::OPERATOR_EQUAL,
+        string $conjunctive = where::CONJUNCTIVE_OPERATOR_AND
+    ): where {
         $where = new where($selector, $values, $operator, $conjunctive);
         $this->wheres[] = $where;
         return $where;
@@ -386,6 +393,14 @@ class builder {
      */
     protected function build_select(): string {
         $selects = [];
+
+        // Move the unique id to the first position.
+        if (array_key_exists('unique_id', $this->selects)) {
+            $uniqueid = $this->selects['unique_id'];
+            unset($this->selects['unique_id']);
+            $this->selects = array_merge(['unique_id' => $uniqueid], $this->selects);
+        }
+
         foreach ($this->selects as $alias => $select) {
             $selects[] = $select . ' AS ' . $alias;
         }
@@ -433,13 +448,12 @@ class builder {
         $sql = '';
 
         if (!empty($this->sqlctelist)) {
-
             foreach ($this->sqlctelist as $viewname => $fromsql) {
                 $sql .= $fromsql . ' ';
             }
         }
 
-        $unique = array_key_exists('unique_id', $this->selects) ? '' : 'DISTINCT' ;
+        $unique = array_key_exists('unique_id', $this->selects) ? '' : 'DISTINCT';
         $sql .= 'SELECT ' . $unique . ' ' . $this->build_select() . ' FROM {' . $this->table . '} ' . $this->tablealias;
 
         $params = [];
@@ -491,7 +505,6 @@ class builder {
 
         [$sql, $params] = $this->get_sql_and_params();
         return $DB->get_records_sql($sql, $params, $this->get_limitfrom(), $this->get_limitnum());
-
     }
 
     /**
@@ -508,11 +521,7 @@ class builder {
         $builder = clone $this;
 
         if ($isunique) {
-
-            $builder->set_selects([
-                'count' => 'COUNT(*)']
-            );
-
+            $builder->set_selects(['count' => 'COUNT(*)']);
         } else {
             $builder->set_selects(['count' => 'COUNT(DISTINCT ' . $this->tablealias . '.id)']);
         }
@@ -523,7 +532,6 @@ class builder {
         $countcachekey = md5($sql . serialize($params));
 
         if (self::$lastcount !== null) {
-
             // If count is already calculated, return it.
             if (self::$lastcountcachekey == $countcachekey) {
                 return self::$lastcount;
@@ -532,7 +540,10 @@ class builder {
 
         self::$lastcountcachekey = $countcachekey;
 
-        $count = $DB->count_records_sql($sql, $params);
+        // Instead of count_records_sql we use get_field_sql to avoid non negative
+        // count exception due do the groupby in the datasource.
+        $count = $DB->get_field_sql($sql, $params);
+        $count = $count ?: 0;
 
         self::$lastcount = $count;
 

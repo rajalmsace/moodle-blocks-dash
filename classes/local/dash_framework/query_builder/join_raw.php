@@ -35,8 +35,6 @@ use dml_exception;
  * @package block_dash
  */
 class join_raw extends join {
-
-
     /**
      * @var string Table name of joined table.
      */
@@ -65,16 +63,22 @@ class join_raw extends join {
     protected $extraparameters;
 
     /**
-     * Constructors
-     * @param string $table Table name of joined table.
+     * Constructors.
+     * @param string $query SQL query for the joined table.
      * @param string $alias Joined table alias.
      * @param string $jointablefield Field of joined table to reference in join condition.
      * @param string $origintablefield Field of origin table to join to.
      * @param string $jointype SQL join type. See self::TYPE_*
      * @param array $extraparameters Extra parameters used in join SQL.
      */
-    public function __construct(string $query, string $alias, string $jointablefield, string $origintablefield,
-                                $jointype = self::TYPE_INNER_JOIN, array $extraparameters = []) {
+    public function __construct(
+        string $query,
+        string $alias,
+        string $jointablefield,
+        string $origintablefield,
+        $jointype = self::TYPE_INNER_JOIN,
+        array $extraparameters = []
+    ) {
         $this->query = $query;
         $this->alias = $alias;
         // Join table field.
